@@ -57,13 +57,14 @@ CUSTOM_RULES_FILE=""
 
 print_banner() {
 cat << 'EOF'
-                           ___
-    ____  _________ _____ |__ \ ___________   __
-   / __ \/ ___/ __ `/ __ \__/ // ___/ ___/ | / /
-  / /_/ / /__/ /_/ / /_/ / __// /__(__  )| |/ /
- / .___/\___/\__,_/ .___/____/\___/____/ |___/
-/_/              /_/
 
+    ____                  ___  _______                ___
+   / __ \_________ _____ |__ \/_  __(_)___ ___  ___  / (_)___  ___
+  / /_/ / ___/ __ `/ __ \__/ / / / / / __ `__ \/ _ \/ / / __ \/ _ \
+ / ____/ /__/ /_/ / /_/ / __/ / / / / / / / / /  __/ / / / / /  __/
+/_/    \___/\__,_/ .___/____//_/ /_/_/ /_/ /_/\___/_/_/_/ /_/\___/
+                /_/
+				
 **Fast PCAP triage into analyst-friendly CSV output**
 
 EOF
@@ -244,13 +245,14 @@ export_alerts_csv() {
     log "Exporting ${ALERTS_CSV}"
 
     # Write CSV header
-    echo "timestamp,src_ip,src_port,dest_ip,dest_port,proto,alert_action,signature_id,signature,category,severity" > "$ALERTS_CSV"
+    echo "timestamp,flow_id,src_ip,src_port,dest_ip,dest_port,proto,alert_action,signature_id,signature,category,severity" > "$ALERTS_CSV"
 
     # Process eve.json line by line
     jq -r '
       select(.event_type=="alert") |
       [
         .timestamp,
+		.flow_id,
         .src_ip,
         .src_port,
         .dest_ip,
@@ -273,7 +275,7 @@ export_dns_csv() {
     log "Exporting ${DNS_CSV}"
 
     # CSV header
-    echo "timestamp,src_ip,src_port,dest_ip,dest_port,proto,dns_type,id,rrname,rrtype,rcode,answers" > "$DNS_CSV"
+    echo "timestamp,flow_id,src_ip,src_port,dest_ip,dest_port,proto,dns_type,id,rrname,rrtype,rcode,answers" > "$DNS_CSV"
 
     jq -r '
       select(.event_type=="dns") |
@@ -284,6 +286,7 @@ export_dns_csv() {
                   end) |
       [
         .timestamp,
+		.flow_id,
         .src_ip,
         .src_port,
         .dest_ip,
@@ -305,12 +308,13 @@ export_http_csv() {
     log "Exporting ${HTTP_CSV}"
 
     # CSV header
-    echo "timestamp,src_ip,src_port,dest_ip,dest_port,proto,hostname,url,http_method,http_user_agent,status,length" > "$HTTP_CSV"
+    echo "timestamp,flow_id,src_ip,src_port,dest_ip,dest_port,proto,hostname,url,http_method,http_user_agent,status,length" > "$HTTP_CSV"
 
     jq -r '
       select(.event_type=="http") |
       [
         .timestamp,
+		.flow_id,
         .src_ip,
         .src_port,
         .dest_ip,
@@ -332,12 +336,13 @@ export_http_csv() {
 export_tls_csv() {
     log "Exporting ${TLS_CSV}"
 
-    echo "timestamp,src_ip,src_port,dest_ip,dest_port,proto,sni,version,ja3,issuerdn,subject,notbefore,notafter,fingerprint" > "$TLS_CSV"
+    echo "timestamp,flow_id,src_ip,src_port,dest_ip,dest_port,proto,sni,version,ja3,issuerdn,subject,notbefore,notafter,fingerprint" > "$TLS_CSV"
 
     jq -r '
       select(.event_type=="tls") |
       [
         .timestamp,
+		.flow_id,
         .src_ip,
         .src_port,
         .dest_ip,
@@ -364,12 +369,13 @@ export_flows_csv() {
     log "Exporting ${FLOWS_CSV}"
 
     # CSV header
-    echo "timestamp,src_ip,src_port,dest_ip,dest_port,proto,start,end,state,pkts_toserver,pkts_toclient,bytes_toserver,bytes_toclient,metadata,hash" > "$FLOWS_CSV"
+    echo "timestamp,flow_id,src_ip,src_port,dest_ip,dest_port,proto,start,end,state,pkts_toserver,pkts_toclient,bytes_toserver,bytes_toclient,metadata,hash" > "$FLOWS_CSV"
 
     jq -r '
       select(.event_type=="flow") |
       [
         .timestamp,
+		.flow_id,
         .src_ip,
         .src_port,
         .dest_ip,
@@ -395,12 +401,13 @@ export_ftp_csv() {
     log "Exporting ${FTP_CSV}"
 
     # CSV header
-    echo "timestamp,src_ip,src_port,dest_ip,dest_port,proto,command,command_data,command_truncated,completion_code,reply,reply_received,reply_truncated" > "$FTP_CSV"
+    echo "timestamp,flow_id,src_ip,src_port,dest_ip,dest_port,proto,command,command_data,command_truncated,completion_code,reply,reply_received,reply_truncated" > "$FTP_CSV"
 
     jq -r '
       select(.event_type=="ftp") |
       [
         .timestamp,
+		.flow_id,
         .src_ip,
         .src_port,
         .dest_ip,
@@ -497,12 +504,13 @@ export_rdp_csv() {
     log "Exporting ${RDP_CSV}"
 
     # CSV header
-    echo "timestamp,src_ip,src_port,dest_ip,dest_port,proto,rdp_event_type,protocol,cookie,tx_id" > "$RDP_CSV"
+    echo "timestamp,flow_id,src_ip,src_port,dest_ip,dest_port,proto,rdp_event_type,protocol,cookie,tx_id" > "$RDP_CSV"
 
     jq -r '
       select(.event_type=="rdp") |
       [
         .timestamp,
+		.flow_id,
         .src_ip,
         .src_port,
         .dest_ip,
@@ -549,12 +557,13 @@ export_timeline_csv() {
     log "Exporting ${TIMELINE_CSV}"
 
     # CSV header
-    echo "timestamp,event_type,event_norm_data,src_ip,src_port,dest_ip,dest_port,proto,extra" > "$TIMELINE_CSV"
+    echo "timestamp,flow_id,event_type,event_norm_data,src_ip,src_port,dest_ip,dest_port,proto,extra" > "$TIMELINE_CSV"
 
     jq -c '
       select(.event_type | IN("alert","dns","http","tls","ftp","smb","ssh","rdp")) |
       {
         timestamp: .timestamp,
+		flow_id: .flow_id,
         event_type: .event_type,
         event_norm_data: (
           if .event_type=="alert" then (.alert.signature // "")
@@ -576,11 +585,11 @@ export_timeline_csv() {
         dest_ip: (.dest_ip // ""),
         dest_port: (.dest_port // ""),
         proto: (.proto // ""),
-        extra: (del(.timestamp,.event_type,.alert,.dns,.http,.tls,.ftp,.smb,.ssh,.rdp,.src_ip,.src_port,.dest_ip,.dest_port,.proto) | @json)
+        extra: (del(.timestamp,.flow_id,.event_type,.alert,.dns,.http,.tls,.ftp,.smb,.ssh,.rdp,.src_ip,.src_port,.dest_ip,.dest_port,.proto) | @json)
       }
     ' "$EVE_JSON" | \
     sort | \
-    jq -r '[.timestamp,.event_type,.event_norm_data,.src_ip,.src_port,.dest_ip,.dest_port,.proto,.extra] | @csv' >> "$TIMELINE_CSV"
+    jq -r '[.timestamp,.flow_id,.event_type,.event_norm_data,.src_ip,.src_port,.dest_ip,.dest_port,.proto,.extra] | @csv' >> "$TIMELINE_CSV"
 
     log "Timeline exported: $(wc -l < "$TIMELINE_CSV") lines (including header)"
 }
