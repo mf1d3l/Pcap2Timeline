@@ -587,7 +587,7 @@ export_timeline_csv() {
         dest_ip: (.dest_ip // ""),
         dest_port: (.dest_port // ""),
         proto: (.proto // ""),
-        extra: (del(.timestamp,.flow_id,.event_type,.alert,.dns,.http,.tls,.ftp,.smb,.ssh,.rdp,.src_ip,.src_port,.dest_ip,.dest_port,.proto) | @json)
+        extra: (del(.timestamp,.flow_id,.event_type,.src_ip,.src_port,.dest_ip,.dest_port,.proto) | @json)
       }
     ' "$EVE_JSON" | \
     sort | \
